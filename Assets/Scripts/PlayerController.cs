@@ -17,6 +17,19 @@ public class PlayerController : MonoBehaviour
         MovePlayer();
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Powerup"))
+        {
+            Powerup powerup = other.GetComponent<Powerup>();
+            if (powerup != null)
+            {
+                GameManager.Instance.ApplyPowerup(powerup.currentPowerupType);
+                Destroy(other.gameObject); // Remove the power-up
+            }
+        }
+    }
+
     void CheckBoundary()
     {
         // Check for left and right bounds

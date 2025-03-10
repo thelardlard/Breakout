@@ -54,12 +54,14 @@ public class ShrinkAndExplode : MonoBehaviour
         // Play explosion particle effect
 
         Instantiate(explosionPrefab, transform.position, transform.rotation);
+        GameManager.Instance.ScreenShake();
 
 
 
         // Destroy the object
 
         Destroy(gameObject);
+        GameManager.Instance.CheckForPowerupSpawn(transform.position);
         AudioManager.Instance.Play(destroyBrick);
 
     }

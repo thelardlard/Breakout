@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using System;
+using PrimeTween;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,12 +14,15 @@ public class UIManager : MonoBehaviour
     public Button resumeButton;
     public Button exitButton;
     public Toggle muteToggle;
-    public GameObject menuPanel;
     public GameObject mainCamera;
     public bool isMuted = false;
     public Image buttonImage;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
+    public RectTransform menuPanelRect; // Assign the menu panel in Inspector
+    private const float animationDuration = 0.2f;
+    private readonly Vector3 hiddenScale = Vector3.zero;   // Completely hidden
+    private readonly Vector3 visibleScale = new Vector3(0.5f, 0.5f, 1f); // Correct base size
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -31,6 +35,7 @@ public class UIManager : MonoBehaviour
         muteToggle.isOn = isMuted;
         UpdateButtonImage(isMuted);
         muteToggle.onValueChanged.AddListener(delegate { ToggleSound(muteToggle.isOn); });
+        menuPanelRect.localScale = hiddenScale; // Ensure it starts hidden
     }
 
     // Update is called once per frame
@@ -56,14 +61,16 @@ public class UIManager : MonoBehaviour
 
     public void OpenMenu()
     {
-        menuPanel.SetActive(true);
-        Time.timeScale = 0;
+        menuPanelRect.gameObject.SetActive(true);
+        Tween.Scale(menuPanelRect, visibleScale, animationDuration, Ease.OutBack).OnComplete(() => Time.timeScale = 0);
+        
     }
 
     public void CloseMenu()
     {
-        menuPanel.SetActive(false);
-        Time.timeScale = 1;
+        Time.timeScale = 1; // Resume immediately
+        Tween.Scale(menuPanelRect, hiddenScale, 0.3f, Ease.InBack)
+            .OnComplete(() => menuPanelRect.gameObject.SetActive(false)); // Hide after shrinking
     }
 
     public void QuitGame()

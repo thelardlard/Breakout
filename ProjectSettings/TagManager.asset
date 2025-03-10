@@ -9,6 +9,7 @@ TagManager:
   - Death
   - Ball
   - Paddle
+  - Powerup
   layers:
   - Default
   - TransparentFX
