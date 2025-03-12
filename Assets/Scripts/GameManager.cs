@@ -33,13 +33,17 @@ public class GameManager : MonoBehaviour
     public AudioClip destroyBrick;
     public AudioClip loseLife;
     private Vector3 ballSpawnPosition = new(0,0.6f,0);
-    private Vector3 paddleSpawnPosition = new(0, 0, 0);   
+    private Vector3 paddleSpawnPosition = new(0, 0, 0);
+    private Vector3 paddleSpawnScale;
     public AnimationCurve shakeCurve;
     public float shakeDuration = 0.5f;
+    private float paddleScale = 1.5f;
+   
 
     void Awake()
     {
         _instance = this; // Set the current instance as the singleton
+                paddleSpawnScale = paddle.transform.localScale;
     }
 
     private void Update()
@@ -69,8 +73,10 @@ public class GameManager : MonoBehaviour
         if (userLives > 0)
         {
             //restart from the paddle position
-            RespawnBall();
+            Debug.Log("ResetPaddle() should be called next...");
             ResetPaddle();
+            RespawnBall();
+            
         }
         else
         {
@@ -88,7 +94,15 @@ public class GameManager : MonoBehaviour
 
     public void ResetPaddle()
     {
+        Debug.Log("ResetPaddle called.");
+        Debug.Log("Paddle Position Before Reset: " + paddle.transform.position);
+        Debug.Log("Paddle Scale Before Reset: " + paddle.transform.localScale);
+
         paddle.transform.position = paddleSpawnPosition;
+        paddle.transform.localScale = paddleSpawnScale;
+
+        Debug.Log("Paddle Position After Reset: " + paddle.transform.position);
+        Debug.Log("Paddle Scale After Reset: " + paddle.transform.localScale);
     }
 
     public void DestroyAllLiveBalls()
@@ -102,18 +116,19 @@ public class GameManager : MonoBehaviour
 
     public void LevelComplete()
     {
+        grid.GetComponent<BrickGrid>().SpawnBricks();
         gameLevel++;
         uiManager.UpdateLevelText();
         DestroyAllLiveBalls();
         ResetPaddle();
         RespawnBall();
-        grid.GetComponent<BrickGrid>().SpawnBricks();
+        
     }
 
     //method to spawn a powerup object
     public void CheckForPowerupSpawn(Vector3 spawnPosition)
     {
-        if (Random.Range(0, 8)  == 0)
+        if (Random.Range(0, 9)  == 0)
         {
             Instantiate(powerupPrefab, spawnPosition, Quaternion.identity);
         }
@@ -127,12 +142,13 @@ public class GameManager : MonoBehaviour
         {
             case Powerup.PowerupType.IncreasePaddle:
                 Debug.Log("Increase Paddle Size");
+                IncreasePaddleSize();
                 // Apply paddle size increase here
                 break;
 
             case Powerup.PowerupType.Multiball:
                 Debug.Log("Activate Multiball");
-                // Spawn multiple balls
+                // Spawn multiple balls                
                 break;
 
             case Powerup.PowerupType.Guns:
@@ -141,8 +157,18 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-    //timer to remove powerup after set time (if required)
-    //IEnum with powerups? Larger paddle, multiball, powerball (explosive radius OR travel through bricks), guns on paddle that fire, extra life
+    
+    public void IncreasePaddleSize()
+    {
+        //Increase paddle size
+        if (paddle.transform.localScale.y <= paddleSpawnScale.y)
+        {
+            paddle.transform.localScale += new Vector3(0,paddleScale,0);
+            Debug.Log("Increase Paddle Size");
+        }
+    }
+
+
 
     public void ScreenShake()
     {
